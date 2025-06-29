@@ -1,12 +1,14 @@
 import { Router, NextFunction, Request, Response } from "express";
 
 import { Book } from "../models/bookModel";
+import { FilterQuery } from "mongoose";
+import { iBook } from "../interface/bookInterface";
 
 export const bookRouter = Router();
 
 bookRouter.post(
   "/",
-  async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { title, author, genre, isbn, description, copies, available } =
         req.body;
@@ -37,7 +39,7 @@ bookRouter.get("/", async (req: Request, res: Response, next: NextFunction) => {
     const { filter, sortBy = "createdAt", sort = "asc", limit = "5" } = req.query;
 
     const sorting = sort === "desc" ? -1 : 1;
-    const query: any = {};
+    const query: FilterQuery<iBook> = {};
 
     if (filter) {
       query.genre = filter;
@@ -110,7 +112,7 @@ bookRouter.delete(
     try {
       const { bookId } = req.params;
 
-      const book = await Book.findByIdAndDelete(bookId);
+       await Book.findByIdAndDelete(bookId);
 
       res.status(200).json({
         success: true,

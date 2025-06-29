@@ -6,26 +6,28 @@ export const borrowRouter = Router();
 
 borrowRouter.post(
   "/",
-  async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { book, quantity, dueDate } = req.body;
 
       const bookCopies = await Book.findById(book);
 
       if (!bookCopies) {
-        return res.status(404).json({
+        res.status(404).json({
           success: false,
           message: "Book not found",
           data: null,
         });
+        return;
       }
 
       if (bookCopies?.copies < quantity) {
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: `Not enough copies available. Only ${bookCopies.copies} left.`,
           data: null,
         });
+        return
       }
 
       const borrow = await Borrow.create({ book, quantity, dueDate });
@@ -36,18 +38,19 @@ borrowRouter.post(
 
       await Book.updateAvailable(book._id);
 
-      return res.status(201).json({
+      res.status(201).json({
         success: true,
         message: "Book borrowed successfully",
         data: borrow,
       });
+  
     } catch (error) {
       next(error);
     }
   }
 );
 
-borrowRouter.get("/", async ( req: Request, res: Response, next: NextFunction): Promise<any>=>{
+borrowRouter.get("/", async ( req: Request, res: Response, next: NextFunction)=>{
   try {
 
     const  borrow = await Borrow.aggregate([
@@ -82,11 +85,12 @@ borrowRouter.get("/", async ( req: Request, res: Response, next: NextFunction): 
       },
     ])
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "Borrowed books summary retrieved successfully",
       data: borrow,
     });
+ 
   } catch (error) {
     next(error)
   }

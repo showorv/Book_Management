@@ -2,15 +2,33 @@ import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import { CustomError } from "./CustomError";
 
+type ValidationErrorDetail = {
+  message: string;
+  name: string;
+  properties?:unknown;
+  kind?: string;
+  path?: string;
+  value?: unknown;
+};
+
+type ErrorResponseType = {
+  success: boolean;
+  message: string;
+  error: {
+    name?: string;
+    errors?: Record<string, ValidationErrorDetail>;
+  };
+};
+
 export const errorHandler = (
-  err: any,
+  err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction 
 ) => {
   let statusCode = 500;
 
-  const errorResponse: any = {
+  const errorResponse: ErrorResponseType = {
     success: false,
     message: "Something went wrong",
     error: {},
@@ -23,10 +41,11 @@ export const errorHandler = (
       name: err.name,
       errors: {},
     };
+
     for (const key in err.errors) {
       const validationErr = err.errors[key];
       if (validationErr instanceof mongoose.Error.ValidatorError) {
-        errorResponse.error.errors[key] = {
+        errorResponse.error.errors![key] = {
           message: validationErr.message,
           name: validationErr.name,
           properties: validationErr.properties,
@@ -35,7 +54,7 @@ export const errorHandler = (
           value: validationErr.value,
         };
       } else {
-        errorResponse.error.errors[key] = {
+        errorResponse.error.errors![key] = {
           message: validationErr.message,
           name: validationErr.name,
         };
@@ -47,10 +66,11 @@ export const errorHandler = (
     errorResponse.error = {
       name: "CustomError",
     };
-  } else {
-    errorResponse.message = err.message || "Internal Server Error";
+  } else if (err && typeof err === "object" && "message" in err) {
+    const error = err as { message?: string; name?: string };
+    errorResponse.message = error.message || "Internal Server Error";
     errorResponse.error = {
-      name: err.name || "Error",
+      name: error.name || "Error",
     };
   }
 
