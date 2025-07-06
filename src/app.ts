@@ -10,6 +10,7 @@ const app: Application = express();
 app.use(express.json())
 
 app.use(cors({
+    origin: "https://bookmanagementfrontend-orpin.vercel.app",
  
 }))
 app.use("/api/books", bookRouter)
