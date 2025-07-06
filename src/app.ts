@@ -10,7 +10,7 @@ const app: Application = express();
 app.use(express.json())
 
 app.use(cors({
-    origin: ["https://bookmanagementfrontend-orpin.vercel.app"],
+    origin: "https://bookmanagementfrontend-orpin.vercel.app",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
  
 }))
