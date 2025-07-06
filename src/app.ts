@@ -9,12 +9,15 @@ const app: Application = express();
 
 app.use(express.json())
 
-app.use(cors({
-    origin: ["https://bookmanagementfrontend-orpin.vercel.app"],
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-    credentials: true, 
- 
-}))
+app.use(
+    cors({
+      origin: process.env.NODE_ENV === "production"
+        ? "https://bookmanagementfrontend-orpin.vercel.app"
+        : "*",
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      credentials: true,
+    })
+  );
 app.use("/api/books", bookRouter)
 app.use("/api/borrow", borrowRouter)
 
