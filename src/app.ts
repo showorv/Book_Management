@@ -13,7 +13,7 @@ app.use(cors({
         "http://localhost:5173",
         "https://bookmanagementfrontend-orpin.vercel.app"
       ],
-      credentials: true,
+    
    
 }))
 app.use("/api/books", bookRouter)
