@@ -17,7 +17,7 @@ const bookSchema = new Schema<iBook, updateAvailableStaticMethod>({
     },
     isbn: {
         type: String,
-        unique: true,
+        unique: [true,"Isbn must be unique"],
         required: true,
         minlength: 13,
         maxlength: 13

@@ -60,6 +60,13 @@ export const errorHandler = (
         };
       }
     }
+
+    const firstField = Object.keys(errorResponse.error.errors || {})[0];
+    if (firstField) {
+      const firstMessage = errorResponse.error.errors![firstField].message;
+      errorResponse.message = `${firstField}: ${firstMessage}`;
+    }
+
   } else if (err instanceof CustomError) {
     statusCode = err.statusCode;
     errorResponse.message = err.message;

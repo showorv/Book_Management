@@ -36,25 +36,38 @@ bookRouter.post(
 
 bookRouter.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { filter, sortBy = "createdAt", sort = "asc", limit = "5" } = req.query;
+    const { filter, sortBy = "createdAt", sort = "asc", limit = "5",page="1" } = req.query;
 
     const sorting = sort === "desc" ? -1 : 1;
     const query: FilterQuery<iBook> = {};
+    const currentPage = parseInt(page as string) || 1;
+    const limitPage = parseInt(limit as string) || 5;
+    const skip = (currentPage-1)* limitPage;
 
     if (filter) {
       query.genre = filter;
     }
 
     const books = filter
-      ? await Book.find(query)
-      .sort({ [sortBy as string]: sorting})
-      .limit(Number(limit))
-      : await Book.find().sort({ createdAt: 1 }).limit(10);
+    ? await Book.find(query)
+    .sort({ [sortBy as string]: sorting}).
+    skip(skip)
+    .limit(Number(limitPage))
+    : await Book.find().sort({ createdAt: 1 }).skip(skip).limit(limitPage);
+
+    const totalBooks = await Book.countDocuments(query);
+    const totalPages = Math.ceil(totalBooks / limitPage);
 
     res.status(200).json({
       success: true,
       message: "Books retrieved successfully",
       data: books,
+      meta: {
+        total: totalBooks,
+        page: currentPage,
+        limit:limitPage,
+        totalPages: totalPages,
+      },
     });
   } catch (error) {
     next(error);
@@ -69,7 +82,6 @@ bookRouter.get(
 
       const book = await Book.findById(bookId);
 
-      await Book.updateAvailable(bookId);
 
       res.status(200).json({
         success: true,
