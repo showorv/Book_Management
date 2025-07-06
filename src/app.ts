@@ -10,10 +10,7 @@ const app: Application = express();
 app.use(express.json())
 
 app.use(
-    cors({
-      origin: process.env.NODE_ENV === "production"
-        ? "https://bookmanagementfrontend-orpin.vercel.app"
-        : "*",
+    cors({origin: "*",
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       credentials: true,
     })
